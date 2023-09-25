@@ -2,7 +2,7 @@ import csv
 
 with open('query.sql','w+') as queryfile:
     queryfile.write("""CREATE TABLE books (
-        id PRIMARY_KEY NOT NULL TEXT,
+        id TEXT NOT NULL PRIMARY KEY,
         title TEXT,
         author TEXT,
         rating TEXT,
