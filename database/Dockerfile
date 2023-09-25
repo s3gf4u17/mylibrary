@@ -1,4 +1,4 @@
-FROM postgres:16.0-alpine3.18
+FROM postgres:latest
 
 ENV POSTGRES_USER postgres
 
