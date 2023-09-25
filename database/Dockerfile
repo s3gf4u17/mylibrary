@@ -6,4 +6,4 @@ ENV POSTGRES_PASSWORD nokiarecruitment
 
 ENV POSTGRES_DB nokia
 
-ADD query.sql /docker-entrypoint-initdb.d/
+# ADD query.sql /docker-entrypoint-initdb.d/
