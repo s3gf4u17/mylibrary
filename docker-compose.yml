@@ -9,12 +9,8 @@ services:
     ports:
       - 8000:8000
     depends_on:
-      database:
-        condition: service_healthy
+      - database
   frontend:
     build: ./frontend
     ports:
       - 80:80
-    depends_on:
-      backend:
-        condition: service_healthy
