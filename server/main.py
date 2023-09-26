@@ -1,40 +1,65 @@
-from fastapi import FastAPI
-import csv
-from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+
+SQLALCHEMY_DATABASE_URL = "postgresql://postgres:nokiarecruitment@172.104.227.113:5432/nokia"
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False,autoflush=False,bind=engine)
+Base = declarative_base()
+
+from sqlalchemy import Column,String
+
+class BookModel(Base):
+    __tablename__="books"
+    id=Column(String,primary_key=True,nullable=False)
+    title=Column(String)
+    author=Column(String)
+    rating=Column(String)
+    isbn=Column(String)
+    isbn13=Column(String)
+    lang=Column(String)
+    pages=Column(String)
+    publication_date=Column(String)
+    publisher=Column(String)
+
+from pydantic import BaseModel
+
+class BookSchema(BaseModel):
+    id:str
+    title:str
+    author:str
+    rating:str
+    isbn:str
+    isbn13:str
+    lang:str
+    pages:str
+    publication_date:str
+    publisher:str
+    class Config:
+        orm_mode = True
+
+from sqlalchemy.orm import Session
+from sqlalchemy import or_
+
+def get_books(db:Session,skip:int=0,limit:int=10,query:str=""):
+    return db.query(BookModel).filter(or_(BookModel.title.icontains(query),BookModel.author.icontains(query))).offset(skip).limit(limit).all()
+
+Base.metadata.create_all(bind=engine)
+
+from fastapi import Depends,FastAPI
+from sqlalchemy.orm import Session
 
 app = FastAPI()
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# DEPENDENCY
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
-data_dict = []
-with open("../database/books.csv","r") as database:
-    reader = csv.reader(database,delimiter=',')
-    next(reader,None)
-    for row in reader:
-        data_dict.append({
-            "id":row[0],
-            "title":row[1],
-            "author":row[2],
-            "rating":row[3],
-            "isbn":row[4],
-            "isbn13":row[5],
-            "language":row[6],
-            "pages":row[7],
-            "publication_date":row[10],
-            "publisher":row[11]
-        })
-
-@app.get("/")
-def read_root(query:str="",limit:int=10):
-    response=[]
-    query = query.lower()
-    for book in data_dict:
-        if query in book["title"].lower() or query in book["author"].lower(): response.append(book)
-        if len(response)>=limit: break
-    return response
+@app.get("/",response_model=list[BookSchema])
+def read_books(skip:int=0,limit:int=10,query:str="",Session=Depends(get_db)):
+    books = get_books(Session,skip,limit,query)
+    return books
