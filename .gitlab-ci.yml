@@ -1,0 +1,21 @@
+stages:
+    - test
+    - deploy
+
+run_tests:
+    stage: test
+    image: python:3.11.5-alpine3.17
+    before_script:
+        - pip install -r backend/requirements.txt
+    script:
+        - cd backend && pytest test.py
+
+deploy:
+    stage: deploy
+    before_script:
+        - chmod 400 $SSH_KEY
+    script:
+        - scp -o StrictHostKeyChecking=no -i $SSH_KEY -r * root@192.46.233.90:~/
+        - ssh -o StrictHostKeyChecking=no -i $SSH_KEY root@192.46.233.90 "
+            docker ps -aq | xargs docker stop | xargs docker rm &&
+            docker-compose up --detach --no-deps --build"
