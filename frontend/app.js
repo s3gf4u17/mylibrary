@@ -5,7 +5,7 @@ const app = Vue.createApp({
         }
     },
     mounted() {
-        fetch("http://127.0.0.1:8000/?").then(res=>res.json()).then(data=>this.books=data);
+        fetch("http://192.46.233.90:8000/?").then(res=>res.json()).then(data=>this.books=data);
     },
     methods: {
         async filterbooks() {
@@ -17,7 +17,7 @@ const app = Vue.createApp({
                     limit = radio[i].value;
                 }
             }
-            const data = await fetch("http://127.0.0.1:8000/?query="+query+"&limit="+limit)
+            const data = await fetch("http://192.46.233.90:8000/?query="+query+"&limit="+limit)
             .then(function(response){
                 return response.json();
             }).then(function(data){
