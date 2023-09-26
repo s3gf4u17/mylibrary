@@ -17,7 +17,8 @@ const app = Vue.createApp({
                     limit = radio[i].value;
                 }
             }
-            const data = await fetch("http://192.46.233.90:8000/?query="+query+"&limit="+limit)
+            let skip = document.getElementById("skip").value;
+            const data = await fetch("http://192.46.233.90:8000/?query="+query+"&limit="+limit+"&skip="+(skip-1)*limit)
             .then(function(response){
                 return response.json();
             }).then(function(data){
