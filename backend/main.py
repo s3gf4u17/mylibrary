@@ -38,6 +38,10 @@ class BookSchema(BaseModel):
         orm_mode = True
 
 def get_books(db:Session,skip:int=0,limit:int=10,query:str=""):
+    if query.startswith("author:"):
+        return db.query(BookModel).filter(BookModel.author.icontains(query.replace("author:",""))).offset(skip).limit(limit).all()
+    elif query.startswith("title:"):
+        return db.query(BookModel).filter(BookModel.title.icontains(query.replace("title:",""))).offset(skip).limit(limit).all()
     return db.query(BookModel).filter(or_(BookModel.title.icontains(query),BookModel.author.icontains(query))).offset(skip).limit(limit).all()
 
 Base.metadata.create_all(bind=engine)
