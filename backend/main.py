@@ -3,6 +3,7 @@ from sqlalchemy.orm import sessionmaker,Session
 from sqlalchemy import create_engine,Column,String,or_
 from pydantic import BaseModel
 from fastapi import Depends,FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 SQLALCHEMY_DATABASE_URL = "postgresql://postgres:nokiarecruitment@192.46.233.90:5432/nokia"
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
@@ -42,6 +43,14 @@ def get_books(db:Session,skip:int=0,limit:int=10,query:str=""):
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 def get_db():
     db = SessionLocal()
