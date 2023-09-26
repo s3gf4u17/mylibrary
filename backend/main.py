@@ -1,13 +1,13 @@
-from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker,Session
+from sqlalchemy import create_engine,Column,String,or_
+from pydantic import BaseModel
+from fastapi import Depends,FastAPI
 
 SQLALCHEMY_DATABASE_URL = "postgresql://postgres:nokiarecruitment@192.46.233.90:5432/nokia"
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False,autoflush=False,bind=engine)
 Base = declarative_base()
-
-from sqlalchemy import Column,String
 
 class BookModel(Base):
     __tablename__="books"
@@ -21,8 +21,6 @@ class BookModel(Base):
     pages=Column(String)
     publication_date=Column(String)
     publisher=Column(String)
-
-from pydantic import BaseModel
 
 class BookSchema(BaseModel):
     id:str
@@ -38,16 +36,10 @@ class BookSchema(BaseModel):
     class Config:
         orm_mode = True
 
-from sqlalchemy.orm import Session
-from sqlalchemy import or_
-
 def get_books(db:Session,skip:int=0,limit:int=10,query:str=""):
     return db.query(BookModel).filter(or_(BookModel.title.icontains(query),BookModel.author.icontains(query))).offset(skip).limit(limit).all()
 
 Base.metadata.create_all(bind=engine)
-
-from fastapi import Depends,FastAPI
-from sqlalchemy.orm import Session
 
 app = FastAPI()
 
